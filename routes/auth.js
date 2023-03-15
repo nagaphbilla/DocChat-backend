@@ -90,7 +90,7 @@ router.post("/login", (req, res) => {
                         expiresIn : "365d"
                     },
                     (err, token) => {
-                        return res.status(200).json(
+                        res.status(200).json(
                             {"user" : user},
                             {"token" :
                             {
@@ -102,7 +102,9 @@ router.post("/login", (req, res) => {
                     }
                 )
             }
-            res.status(400).json({passwordIncorrect : "Password is incorrect"})
+            else {
+                res.status(400).json({passwordIncorrect : "Password is incorrect"})
+            }
         })
     })
 })
