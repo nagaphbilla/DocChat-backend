@@ -11,7 +11,7 @@ function validAuth(data, register) {
         errors.email = "Email field is required"
     }
 
-    if(register == true && data.name == "" || data.name == null) {
+    if(register == true && (data.name == "" || data.name == null)) {
         errors.name = "Name field is required"
     }
 
@@ -39,7 +39,6 @@ router.post("/register", async (req, res) => {
         if(user) {
             return res.status(401).json({ email : "Email already exists"})
         }
-        else {
             const newUser = new User({
                 name : req.body.name,
                 email : req.body.email,
@@ -51,13 +50,15 @@ router.post("/register", async (req, res) => {
                     if(err)
                         throw err
                     newUser.password = hash
-                    newUser.save()
+                    newUser.save(err => {
+                        console.log(err)
+                        return res.status(500).json({ err : "Unable to update database"})
+                    })
                     .then(user => res.status(200).json(user))
-                    .catch(err => console.log(err))
                 })
             })
         }
-    })
+    )
 })
 
 router.post("/login", (req, res) => {
@@ -89,16 +90,19 @@ router.post("/login", (req, res) => {
                         expiresIn : "365d"
                     },
                     (err, token) => {
-                        res.status(200).json({
+                        return res.status(200).json(
+                            {"user" : user},
+                            {"token" :
+                            {
                             success : true,
                             token : "Bearer " + token
-                        })
+                            }
+                        }
+                        )
                     }
                 )
             }
-            else {
-                return res.status(400).json({passwordIncorrect : "Password is incorrect"})
-            }
+            res.status(400).json({passwordIncorrect : "Password is incorrect"})
         })
     })
 })
