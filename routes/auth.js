@@ -92,6 +92,7 @@ router.post("/login", (req, res) => {
                         expiresIn : "365d"
                     },
                     (err, token) => {
+                        user["password"] = undefined
                         res.status(200).json(
                             {"user" : user,
                             "token" :
