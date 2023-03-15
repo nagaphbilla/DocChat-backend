@@ -50,11 +50,13 @@ router.post("/register", async (req, res) => {
                     if(err)
                         throw err
                     newUser.password = hash
-                    newUser.save(err => {
-                        console.log(err)
-                        return res.status(500).json({ err : "Unable to update database"})
+                    newUser.save()
+                    .then(user => {
+                        if(!user) {
+                            return res.status(500).json({ err : "Unable to update database"})
+                        }
+                        res.status(200).json(user)
                     })
-                    .then(user => res.status(200).json(user))
                 })
             })
         }
@@ -90,9 +92,9 @@ router.post("/login", (req, res) => {
                         expiresIn : "365d"
                     },
                     (err, token) => {
-                        return res.status(200).json(
-                            {"user" : user},
-                            {"token" :
+                        res.status(200).json(
+                            {"user" : user,
+                            "token" :
                             {
                             success : true,
                             token : "Bearer " + token
@@ -102,7 +104,9 @@ router.post("/login", (req, res) => {
                     }
                 )
             }
-            res.status(400).json({passwordIncorrect : "Password is incorrect"})
+            else {
+                res.status(400).json({passwordIncorrect : "Password is incorrect"})
+            }
         })
     })
 })
