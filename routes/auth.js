@@ -50,11 +50,13 @@ router.post("/register", async (req, res) => {
                     if(err)
                         throw err
                     newUser.password = hash
-                    newUser.save(err => {
-                        console.log(err)
-                        return res.status(500).json({ err : "Unable to update database"})
+                    newUser.save()
+                    .then(user => {
+                        if(!user) {
+                            return res.status(500).json({ err : "Unable to update database"})
+                        }
+                        res.status(200).json(user)
                     })
-                    .then(user => res.status(200).json(user))
                 })
             })
         }
@@ -91,8 +93,8 @@ router.post("/login", (req, res) => {
                     },
                     (err, token) => {
                         res.status(200).json(
-                            {"user" : user},
-                            {"token" :
+                            {"user" : user,
+                            "token" :
                             {
                             success : true,
                             token : "Bearer " + token
