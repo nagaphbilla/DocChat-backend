@@ -10,26 +10,37 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET,
 })
 
-function validPath(data) {
+function validPath(data, newFile) {
   let errors = {}
 
-  if(!data.name) {
+  if(newFile) {
+    if(!data.name) {
       errors.name = "Name field is required"
+    }
+    if(!data.fileType) {
+      errors.fileType = "File Type field is required"
+    }
+    if(!data.url) {
+      errors.fileUrl = "File URL field is required"
+    }    
   }
 
   if(!data.path) {
       errors.path = "Path field is required"
   }
 
-  else if(data.path.slice(0, 2) != "./" || data.path.split('/').at(-1) != data.name + '.' + data.fileType) {
-  // else if(data.path.slice(0, 2) != "./" || dir.at(-1) != data.name || dir.length < 3) {
-      errors.path = "Invalid path"
+  else if(data.path.slice(0, 2) != "./") {
+      errors.Invalidpath = "Path always starts with ./"
+  }
+
+  else if(newFile && data.path.split('/').at(-1) != data.name + '.' + data.fileType) {
+      errors.Invalidpath = "Path doesn't match with file name"
   }
 
   else {
       data.path.split('/').forEach(folder => {
           if(!folder) {
-              return errors.path = "Invalid path"
+              return errors.Invalidpath = "Invalid Path"
           }
       })
   }
@@ -41,7 +52,7 @@ function validPath(data) {
 
 /* Creating a new File */
 router.post("/newFile", verifyUser, (req, res) => {
-  const {errors, noOfErrors} = validPath(req.body)
+  const {errors, noOfErrors} = validPath(req.body, true)
   const { path } = req.body
 
   if(noOfErrors > 0) {
@@ -81,7 +92,13 @@ router.post("/newFile", verifyUser, (req, res) => {
 
 /*Getting all the files and folders */
 router.post("/getFiles", verifyUser, (req, res) => {
-  const { path } = req.body;
+  const {errors, noOfErrors} = validPath(req.body, false)
+  const { path } = req.body
+
+  if(noOfErrors > 0) {
+      return res.status(400).json(errors)
+  }
+
   Folders.findOne({ path })
     .populate("folders")
     .populate("files")
@@ -96,7 +113,12 @@ router.post("/getFiles", verifyUser, (req, res) => {
 
 /* Deleting a File */
 router.post("/deleteFile", verifyUser, (req, res) => {
+  const {errors, noOfErrors} = validPath(req.body, false)
   const { path } = req.body
+
+  if(noOfErrors > 0) {
+      return res.status(400).json(errors)
+  }
 
   Files.findOne({ path }).then(file => {
     if(!file) {
@@ -132,44 +154,6 @@ router.post("/deleteFile", verifyUser, (req, res) => {
   //     res.status(200).json(result)
   //   })
   // })
-})
-
-/* filtering the documents */
-router.post("/filterSearch", verifyUser, (req, res, next) => {
-  if (req.body.name.length < 2) {
-    return res.status(400)
-  }
-
-  let pattern = new RegExp("^" + req.body.name)
-  if (req.body.searchFor === "file") {
-    if (req.body.fileType === "all") {
-      Files.find({ name: { $regex: pattern, $options: "i" } })
-        .sort(req.body.order + req.body.sortBy)
-        .then((files) => {
-          console.log(files)
-          res.json(files)
-        })
-    } else {
-      Files.find({
-        $and: [
-          { name: { $regex: pattern, $options: "i" } },
-          { fileType: req.body.fileType },
-        ],
-      })
-        .sort(req.body.order + req.body.sortBy)
-        .then((files) => {
-          console.log(files)
-          res.json(files)
-        });
-    }
-  } else {
-    Folders.find({ name: { $regex: pattern, $options: "i" } })
-      .sort(req.body.order + req.body.sortBy)
-      .then((folders) => {
-        console.log(folders)
-        res.json(folders)
-      })
-  }
 })
 
 module.exports = router
