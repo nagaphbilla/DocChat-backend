@@ -33,9 +33,9 @@ function validPath(data, newFile) {
       errors.Invalidpath = "Path always starts with ./"
   }
 
-  else if(newFile && data.path.split('/').at(-1) != data.name + '.' + data.fileType) {
-      errors.Invalidpath = "Path doesn't match with file name"
-  }
+  // else if(newFile && data.path.split('/').at(-1) != data.name + '.' + data.fileType) {
+  //     errors.Invalidpath = "Path doesn't match with file name"
+  // }
 
   else {
       data.path.split('/').forEach(folder => {

@@ -25,9 +25,9 @@ function validPath(data) {
         errors.Invalidpath = "Path always start with ./"
     }
 
-    else if(data.path.split('/').at(-1) != data.name) {
-        errors.Invalidpath = "Path doesn't match with folder name"
-    }
+    // else if(data.path.split('/').at(-1) != data.name) {
+    //     errors.Invalidpath = "Path doesn't match with folder name"
+    // }
 
     else {
         data.path.split('/').forEach(folder => {
