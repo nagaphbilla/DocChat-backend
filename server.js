@@ -6,6 +6,7 @@ const mongoose = require("mongoose")
 const cloudinary = require("cloudinary").v2
 
 const authRoute = require("./routes/auth")
+const roomRoute = require("./routes/room")
 const fileRoute = require("./routes/file")
 const folderRoute = require("./routes/folder")
 
@@ -22,6 +23,7 @@ mongoose.connect(process.env.MONGO_URL, {
 .catch(err => console.log(err))
 
 app.use("/api/auth", authRoute)
+app.use("/api/room", roomRoute)
 app.use("/api/file", fileRoute)
 app.use("/api/folder", folderRoute)
 
