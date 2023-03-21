@@ -69,13 +69,13 @@ router.post("/joinRoom", verifyUser, async (req, res) => {
     }
 
     User.findByIdAndUpdate(user, {
-        $push : { rooms : room }
-    })
-    .then(user => {
+        $addToSet : { rooms : room }
+    }, { new : true })
+    .then(newUser => {
         Room.findByIdAndUpdate(room, {
-            $push : { members : user }
+            $addToSet : { members : user }
         })
-        .then(room => res.status(200).json(user))
+        .then(() => res.status(200).json(newUser))
     })
 })
 
