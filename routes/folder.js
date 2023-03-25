@@ -13,8 +13,6 @@ cloudinary.config({
 function validPath(data, newFolder) {
     let errors = {}
 
-    const path = new String(data.path)
-
     if(newFolder && !data.name) {
         errors.name = "Name field is required"
     }
@@ -23,16 +21,12 @@ function validPath(data, newFolder) {
         errors.path = "Path field is required"
     }
 
-    else if(path.slice(0, 2) != "./") {
+    else if(data.path.slice(0, 2) != "./") {
         errors.Invalidpath = "Path always start with ./"
     }
 
-    else if(newFolder && path.split('/').at(-1) != data.name) {
-        errors.Invalidpath = "Path doesn't match with folder name"
-    }
-
     else {
-        path.split('/').forEach(folder => {
+        data.path.split('/').forEach(folder => {
             if(!folder) {
                 return errors.Invalidpath = "Invalid path"
             }
