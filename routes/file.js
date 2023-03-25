@@ -90,27 +90,6 @@ router.post("/newFile", verifyUser, (req, res) => {
 })
 })
 
-/*Getting all the files and folders */
-router.post("/getFiles", verifyUser, (req, res) => {
-  const {errors, noOfErrors} = validPath(req.body, false)
-  const { path } = req.body
-
-  if(noOfErrors > 0) {
-      return res.status(400).json(errors)
-  }
-
-  Folders.findOne({ path })
-    .populate("folders")
-    .populate("files")
-    .then((folder) => {
-      if (!folder) {
-        return res.status(400).json({ err: "Folder you are trying to access is not present" })
-      }
-
-      res.status(200).json({ folder })
-    })
-})
-
 /* Deleting a File */
 router.post("/deleteFile", verifyUser, (req, res) => {
   const {errors, noOfErrors} = validPath(req.body, false)

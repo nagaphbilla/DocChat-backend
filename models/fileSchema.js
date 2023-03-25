@@ -20,7 +20,6 @@ const fileSchema = new mongoose.Schema({
 
     isShareable: {
         type: Boolean,
-        required: true,
         default: false
     },
 
@@ -31,6 +30,11 @@ const fileSchema = new mongoose.Schema({
 
     size: {
         type: String
+    },
+
+    isFile : {
+        type : Boolean,
+        default : true
     }
 }, {
     timestamps: true

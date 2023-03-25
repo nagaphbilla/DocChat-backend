@@ -10,10 +10,10 @@ cloudinary.config({
     api_secret: process.env.CLOUD_API_SECRET,
 })
 
-function validPath(data) {
+function validPath(data, newFolder) {
     let errors = {}
 
-    if(!data.name) {
+    if(newFolder && !data.name) {
         errors.name = "Name field is required"
     }
 
@@ -25,9 +25,9 @@ function validPath(data) {
         errors.Invalidpath = "Path always start with ./"
     }
 
-    // else if(data.path.split('/').at(-1) != data.name) {
-    //     errors.Invalidpath = "Path doesn't match with folder name"
-    // }
+    else if(newFolder && data.path.split('/').at(-1) != data.name) {
+        errors.Invalidpath = "Path doesn't match with folder name"
+    }
 
     else {
         data.path.split('/').forEach(folder => {
@@ -42,8 +42,9 @@ function validPath(data) {
     return {errors, noOfErrors}
 }
 
+/* Creating a new Folder */
 router.post('/newFolder', verifyUser, (req, res) => {
-    const {errors, noOfErrors} = validPath(req.body)
+    const {errors, noOfErrors} = validPath(req.body, true)
     const { path } = req.body
 
     if(noOfErrors > 0) {
@@ -81,5 +82,27 @@ router.post('/newFolder', verifyUser, (req, res) => {
         })
     })
 })
+
+/*Getting all the files and folders */
+router.post("/getFiles", verifyUser, (req, res) => {
+    const {errors, noOfErrors} = validPath(req.body, false)
+    const { path } = req.body
+  
+    if(noOfErrors > 0) {
+        return res.status(400).json(errors)
+    }
+  
+    Folders.findOne({ path })
+      .populate("folders")
+      .populate("files")
+      .then((mainFolder) => {
+        if (!mainFolder) {
+          return res.status(400).json({ err: "Folder you are trying to access is not present" })
+        }
+  
+        const response = mainFolder["folders"].concat(mainFolder["files"])
+        res.status(200).json(response)
+      })
+  })
 
 module.exports = router;
